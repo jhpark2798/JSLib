@@ -20,8 +20,6 @@ namespace JSLib {
 		void setupArguments(PricingEngine::arguments* a) const;
 		void fetchResults(PricingEngine::results* r) const;
 
-		void setEvalDate(const Date& d) { evalDate_ = d; }
-		Date evalDate() const { return evalDate_; }
 		double delta() const;
 		double gamma() const;
 		double theta() const;
@@ -33,7 +31,6 @@ namespace JSLib {
 
 		std::shared_ptr<Payoff> payoff_;
 		std::shared_ptr<Exercise> exercise_;
-		Date evalDate_;
 		
 		mutable double delta_;
 		mutable double gamma_;

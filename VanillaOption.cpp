@@ -1,5 +1,6 @@
 #include "VanillaOption.h"
 #include "Utility.h"
+#include "Settings.h"
 #include <stdexcept>
 
 namespace JSLib {
@@ -16,7 +17,7 @@ namespace JSLib {
 	}
 
 	bool VanillaOption::isExpired() const {
-		return exercise_->lastDate() < evalDate_;
+		return exercise_->lastDate() < Settings::instance().evaluationDate();
 	}
 
 	void VanillaOption::setupExpired() const {

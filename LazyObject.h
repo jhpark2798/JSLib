@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Observer.h"
+#include "DesignPattern/Observer.h"
 
 namespace JSLib {
 
