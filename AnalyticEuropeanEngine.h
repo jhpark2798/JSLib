@@ -9,13 +9,12 @@ namespace JSLib {
 		: public VanillaOption::engine {
 	public:
 		AnalyticEuropeanEngine(const std::shared_ptr<GBMProcess>& process,
-			double riskLessRate, OptionType type)
-			: process_(process), r_(riskLessRate), type_(type) {}
+			double riskLessRate)
+			: process_(process), r_(riskLessRate) {}
 		void calculate() const;
 	private:
 		std::shared_ptr<GBMProcess> process_;
 		double r_;
-		OptionType type_;
 	};
 
 }

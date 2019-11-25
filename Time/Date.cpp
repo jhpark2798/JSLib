@@ -3,6 +3,7 @@
 #include <iostream>
 #include <sstream>
 #include <vector>
+#include <chrono>
 
 namespace JSLib {
 
@@ -10,6 +11,16 @@ namespace JSLib {
 		y_ = std::atoi(ymd.substr(0, 4).c_str());
 		m_ = std::atoi(ymd.substr(4, 2).c_str());
 		d_ = std::atoi(ymd.substr(6, 2).c_str());
+	}
+
+	Weekday Date::weekday() const {
+		std::tm t0_ = { 0, 0, 0, 17, 10 - 1, 2018 - 1900 };
+		std::tm t1_ = { 0, 0, 0, d_, m_ - 1, y_ - 1900 };
+		std::time_t t0 = std::mktime(&t0_);
+		std::time_t t1 = std::mktime(&t1_);
+		int diff = std::difftime(t1, t0) / (60 * 60 * 24); // days between two dates
+		int res = diff % 7 < 0 ? diff % 7 + 7 : diff % 7;
+		return static_cast<Weekday>(res);
 	}
 
 	int Date::daysFrom(const Date& d) const {

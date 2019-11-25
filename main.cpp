@@ -3,7 +3,7 @@
 #include "Utility.h"
 #include "DesignPattern/Observer.h"
 #include "AnalyticEuropeanEngine.h"
-#include "Date.h"
+#include "Time/Date.h"
 #include "GBMProcess.h"
 #include "Payoff.h"
 #include "Exercise.h"
@@ -22,11 +22,17 @@ int main() {
 	double strike = 100;
 	Settings::instance().evaluationDate() = today;
 	std::shared_ptr<PricingEngine> engine = 
-		std::make_shared<AnalyticEuropeanEngine>(process, riskLessRate, optionType);
-	std::shared_ptr<Payoff> payoff = std::make_shared<PlainVanillaPayoff>(strike, optionType);
+		std::make_shared<AnalyticEuropeanEngine>(process, riskLessRate);
+	std::shared_ptr<Payoff> payoff = std::make_shared<PlainVanillaPayoff>(optionType, strike);
 	std::shared_ptr<Exercise> exercise = std::make_shared<EuropeanExercise>(maturDate);
 	VanillaOption option(payoff, exercise);
 	option.setPricingEngine(engine);
-	cout << option.NPV() << endl;
+
+	cout << "price : " << option.NPV() << endl;
+	cout << "delta : " << option.delta() << endl;
+	cout << "gamma : " << option.gamma() << endl;
+	cout << "theta : " << option.theta() << endl;
+	cout << "vega : " << option.vega() << endl;
+	cout << "rho : " << option.rho() << endl;
 	return 0;
 }

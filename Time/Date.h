@@ -3,6 +3,16 @@
 #include <vector>
 
 namespace JSLib {
+
+	enum Weekday {
+		Wed = 0,
+		Thu,
+		Fri,
+		Sat,
+		Sun,
+		Mon,
+		Tue,
+	};
 	
 	class Date {
 	public:
@@ -14,6 +24,7 @@ namespace JSLib {
 		int year() const { return y_; }
 		int month() const { return m_; }
 		int day() const { return d_; }
+		Weekday weekday() const;
 		int daysFrom(const Date& d) const;
 		Date addDays(int days);
 

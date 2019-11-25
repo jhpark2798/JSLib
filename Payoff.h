@@ -11,15 +11,30 @@ namespace JSLib {
 		virtual double strike() const = 0;
 	};
 
-	class PlainVanillaPayoff : public Payoff {
+	// intermediate class for put/call payoff
+	class TypePayoff : public Payoff {
 	public:
-		PlainVanillaPayoff(double strike, OptionType type) :
-			strike_(strike), type_(type) {}
-		double operator()(double price) const;
-		double strike() const { return strike_; }
-	private:
-		double strike_;
+		OptionType optionType() const { return type_; }
+	protected:
+		explicit TypePayoff(OptionType type) : type_(type) {}
 		OptionType type_;
+	};
+
+	// intermediate class for payoff based on fixed strike 
+	class StrikedTypePayoff : public TypePayoff {
+	public:
+		double strike() const { return strike_; }
+	protected:
+		explicit StrikedTypePayoff(OptionType type, double strike) 
+			: TypePayoff(type), strike_(strike) {}
+		double strike_;
+	};
+
+	class PlainVanillaPayoff : public StrikedTypePayoff {
+	public:
+		PlainVanillaPayoff(OptionType type, double strike)
+			: StrikedTypePayoff(type, strike) {}
+		double operator()(double price) const;
 	};
 
 }

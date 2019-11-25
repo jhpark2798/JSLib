@@ -2,7 +2,7 @@
 #include "Instrument.h"
 #include "Payoff.h"
 #include "Exercise.h"
-#include "Date.h"
+#include "Time/Date.h"
 #include <memory>
 
 namespace JSLib {
@@ -18,7 +18,7 @@ namespace JSLib {
 		double errorEstimate() const;
 		bool isExpired() const;
 		void setupArguments(PricingEngine::arguments* a) const;
-		void fetchResults(PricingEngine::results* r) const;
+		void fetchResults(const PricingEngine::results* r) const;
 
 		double delta() const;
 		double gamma() const;

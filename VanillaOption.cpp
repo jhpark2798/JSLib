@@ -33,8 +33,9 @@ namespace JSLib {
 		arguments->payoff = payoff_;
 	}
 
-	void VanillaOption::fetchResults(PricingEngine::results* r) const {
-		VanillaOption::results* results = dynamic_cast<VanillaOption::results*>(r);
+	void VanillaOption::fetchResults(const PricingEngine::results* r) const {
+		Instrument::fetchResults(r);
+		const VanillaOption::results* results = dynamic_cast<const VanillaOption::results*>(r);
 		JS_REQUIRE(results, "wrong results type");
 		delta_ = results->delta;
 		gamma_ = results->gamma;
