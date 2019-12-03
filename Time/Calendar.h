@@ -13,11 +13,12 @@ namespace JSLib {
 			virtual bool isBusinessDay(const Date& d) const = 0;
 		};
 		std::shared_ptr<Impl> impl_;
-	
+		
 	public:
 		bool isBusinessDay(const Date& d) const { return impl_->isBusinessDay(d); }
 		bool isHoliday(const Date& d) const { return !isBusinessDay(d); }
-
+		Date adjust(const Date& d) const;
+		Date advance(const Date& d, int n) const;
 	};
 
 }

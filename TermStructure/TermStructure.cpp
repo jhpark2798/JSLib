@@ -22,30 +22,40 @@ namespace JSLib {
 	}
 
 	double TermStructure::maxTime() const {
-		// 미완성
-		return 0;
+		return timeFromReference(maxDate());
 	}
 
 	const Date& TermStructure::referenceDate() const {
-		// 미완성
-		return Date();
+		if (!updated_) {
+			Date today = Settings::instance().evaluationDate();
+			referenceDate_ = calendar().advance(today, settlementDays());
+			updated_ = true;
+		}
+		return referenceDate_;
 	}
 
-	double TermStructure::timeFromReference(const Date& date) const {
-		// 미완성
-		return 0;
+	double TermStructure::timeFromReference(const Date& d) const {
+		return dayCounter().yearFraction(referenceDate(), d);
 	}
 
 	void TermStructure::update() {
-		// 미완성
+		if (moving_)
+			updated_ = false;
+		notifyObservers();
 	}
 
 	void TermStructure::checkRange(const Date& date, bool extrapolate) const {
-		// 미완성
+		checkRange(timeFromReference(date), extrapolate);
 	}
 
 	void TermStructure::checkRange(double time, bool extrapolate) const {
-		// 미완성
+		JS_REQUIRE(time >= 0.0, "negative time given");
+		JS_REQUIRE(extrapolate || allowsExtrapolation() || time <= maxTime(),
+			"time is past max curve time");
 	}
 
 }
+
+
+
+
