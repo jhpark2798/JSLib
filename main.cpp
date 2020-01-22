@@ -4,6 +4,7 @@
 #include "DesignPattern/Observer.h"
 #include "AnalyticEuropeanEngine.h"
 #include "Time/Date.h"
+#include "Time/Actual365.h"
 #include "GBMProcess.h"
 #include "Payoff.h"
 #include "Exercise.h"
@@ -34,5 +35,9 @@ int main() {
 	cout << "theta : " << option.theta() << endl;
 	cout << "vega : " << option.vega() << endl;
 	cout << "rho : " << option.rho() << endl;
+
+	Actual365 dayCounter{};
+	cout << dayCounter.yearFraction(Date(2019, 11, 1), Date(2019, 11, 10)) << endl;
+
 	return 0;
 }

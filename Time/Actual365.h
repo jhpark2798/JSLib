@@ -14,7 +14,7 @@ namespace JSLib {
 		};
 		std::shared_ptr<DayCounter::Impl> implementation();
 	public:
-		explicit Actual365() {}
+		explicit Actual365() : DayCounter(implementation()) {}
 	};
 
 }

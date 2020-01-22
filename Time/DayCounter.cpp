@@ -7,6 +7,4 @@ namespace JSLib {
 		return impl_->yearFraction(d1, d2);
 	}
 
-
-
 }
