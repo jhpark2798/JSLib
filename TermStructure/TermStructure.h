@@ -21,8 +21,8 @@ namespace JSLib {
 		virtual ~TermStructure() {}
 
 		virtual DayCounter dayCounter() const { return dayCounter_; }
-		virtual Date maxDate() const = 0; // 무슨함수?	// 왜 pure virtual?
-		virtual double maxTime() const; // 무슨함수?	// 왜 virtual?
+		virtual Date maxDate() const = 0; // 왜 pure virtual?
+		virtual double maxTime() const; // 왜 virtual?
 		virtual const Date& referenceDate() const;
 		virtual Calendar calendar() const { return calendar_; }
 		virtual int settlementDays() const { return settlementDays_; }
