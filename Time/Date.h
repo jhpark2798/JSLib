@@ -18,7 +18,7 @@ namespace JSLib {
 	public:
 		Date() {}
 		Date(int y, int m, int d)
-			: y_(y), m_(m), d_(d), monthsThirtyOneDays({ 1,3,5,7,8,10,12 }) {	}
+			: y_(y), m_(m), d_(d), monthsThirtyOneDays{ 1,3,5,7,8,10,12 } {}
 		Date(std::string ymd);
 
 		int year() const { return y_; }

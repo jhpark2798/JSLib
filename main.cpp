@@ -1,5 +1,7 @@
 #include <iostream>
 #include <memory>
+#include <vector>
+
 #include "Utility.h"
 #include "DesignPattern/Observer.h"
 #include "AnalyticEuropeanEngine.h"
@@ -9,12 +11,14 @@
 #include "Payoff.h"
 #include "Exercise.h"
 #include "Settings.h"
+#include "Math/LinearInterpolation.h"
 
 using std::cout;
 using std::endl;
 using namespace JSLib;
 
 int main() {
+	// plain vanilla call option pricing example
 	std::shared_ptr<GBMProcess> process = std::make_shared<GBMProcess>(100, 0, 0.2);
 	double riskLessRate = 0.02;
 	Date today = Date(2019, 11, 18);
@@ -35,9 +39,23 @@ int main() {
 	cout << "theta : " << option.theta() << endl;
 	cout << "vega : " << option.vega() << endl;
 	cout << "rho : " << option.rho() << endl;
+	cout << endl;
 
+	// Day count convention example
 	Actual365 dayCounter{};
 	cout << dayCounter.yearFraction(Date(2019, 11, 1), Date(2019, 11, 10)) << endl;
+	cout << endl;
+	
+	// Linear interpolation example
+	std::vector<double> dates = { 0.1, 0.2, 0.3, 0.5 };
+	std::vector<double> rates = { 0.015, 0.02, 0.022, 0.025 };
+	LinearInterpolation interpolation(dates.begin(), dates.end(), rates.begin());
+	cout << interpolation(0.4) << endl;
+	//cout << interpolation(0.51) << endl;	// error. interpolation does not allow extrapolation
+	cout << endl;
 
 	return 0;
 }
+
+
+
