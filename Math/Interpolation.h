@@ -24,6 +24,7 @@ namespace JSLib {
 	
 	public:
 		// 그냥 애초에 Impl을 template으로 만들면 되지 왜 Impl 만들고 상속받음?
+		// 인터페이스랑 구현을 구분하고 싶었나? 구현을 꼭 iterator로 해야하는건 아니니까
 		template <class I1, class I2>
 		class templateImpl : public Impl {
 		public:

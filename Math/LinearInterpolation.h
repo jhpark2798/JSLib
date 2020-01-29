@@ -59,7 +59,7 @@ namespace JSLib {
 		}
 	};
 
-	// LinearInterpolation의 traits class
+	// LinearInterpolation의 traits class // Interpolator 라고 생각
 	// Interpolation 객체를 가지고 있는 객체가 복사생성자를 작성할 때 interpolate 함수를 사용해야 함
 	// 이와 같이 LinearInterpolation의 부수적인 기능들을 모아놓은 클래스인듯
 	class Linear {	
