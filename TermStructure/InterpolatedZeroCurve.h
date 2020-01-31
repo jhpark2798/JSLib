@@ -22,7 +22,7 @@ namespace JSLib {
 		InterpolatedZeroCurve(const std::vector<Date>& dates,
 			const std::vector<double>& yields, const DayCounter& dayCounter,
 			const Interpolator& interpolator = Interpolator());
-	
+		Date maxDate() const { return dates_.back(); }
 	protected:
 		double zeroYieldImpl(double t) const;
 
@@ -45,7 +45,7 @@ namespace JSLib {
 		const T& interpolator)
 		: ZeroYieldStructure(dates.front(), Calendar(), dayCounter),
 		dates_(dates), yields_(yields), interpolator_(interpolator) {
-		initialize(compound)
+		initialize();
 	}
 
 	template <class T>
@@ -73,7 +73,7 @@ namespace JSLib {
 			JS_REQUIRE(dates_[i] > dates_[i - 1], "invalid date");
 			times_[i] = dayCounter().yearFraction(dates_[0], dates_[i]);
 		}
-		interpolation_ = interpolator_.interpolate(times_.begin(), times_.end(), yields.begin());
+		interpolation_ = interpolator_.interpolate(times_.begin(), times_.end(), yields_.begin());
 		interpolation_.update();
 	}
 
