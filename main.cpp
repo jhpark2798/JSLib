@@ -19,6 +19,7 @@ using std::endl;
 using namespace JSLib;
 
 int main() {
+
 	// plain vanilla call option pricing example
 	//std::shared_ptr<GBMProcess> process = std::make_shared<GBMProcess>(100, 0, 0.2);
 	//double riskLessRate = 0.02;
@@ -63,6 +64,7 @@ int main() {
 	InterpolatedZeroCurve<Linear> yieldStructure(dates, yields, Actual365());
 	cout << yieldStructure.zeroRate(Date(2020, 3, 30), Actual365(), Continuous) << endl;
 	return 0;
+
 }
 
 

@@ -10,7 +10,7 @@ namespace JSLib {
 	class TermStructure : public virtual Observer, 
 		public virtual Observable, public Extrapolator {	// 왜 Extrapolator는 그냥 상속?
 	public:
-		// default 값이 필요한 이유? 생성자가 3개나 필요한 이유?
+		// Calendar, DayCounter의 default 값이 왜 필요할까?
 		// 자식클래스에서 이 생성자를 호출한다면 referenceDate가 없는 걸 고려해야 함
 		TermStructure(const DayCounter& dc = DayCounter());
 		TermStructure(const Date& referenceDate,
