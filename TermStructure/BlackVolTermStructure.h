@@ -36,6 +36,36 @@ namespace JSLib{
 		virtual double blackVolImpl(double t, double strike) const = 0;
 	};
 
+	// BlackVolTermStructure의 blackVarianceImpl을 구현한 버전
+	// 이 클래스를 상속받은 클래스는 blackVolImpl만 구현하면 된다	
+	class BlackVolatilityTermStructure : public BlackVolTermStructure {
+	public:
+		BlackVolatilityTermStructure(const DayCounter& dc = DayCounter())
+			: BlackVolTermStructure(dc) {}
+		BlackVolatilityTermStructure(const Date& referenceDate,
+			const Calendar& cal = Calendar(), const DayCounter& dc = DayCounter())
+			: BlackVolTermStructure(referenceDate, cal, dc) {}
+		BlackVolatilityTermStructure(int settlementDays,
+			const Calendar& cal, const DayCounter& dc = DayCounter())
+			: BlackVolTermStructure(settlementDays, cal, dc) {}
+	protected:
+		double blackVarianceImpl(double t, double strike) const;
+	};
 
+	// BlackVolTermStructure의 blackVolImpl을 구현한 버전
+	// 이 클래스를 상속받은 클래스는 blackVarianceImpl만 구현하면 된다
+	class BlackVarianceTermStructure : public BlackVolTermStructure {
+	public:
+		BlackVarianceTermStructure(const DayCounter& dc = DayCounter())
+			: BlackVolTermStructure(dc) {}
+		BlackVarianceTermStructure(const Date& referenceDate,
+			const Calendar& cal = Calendar(), const DayCounter& dc = DayCounter())
+			: BlackVolTermStructure(referenceDate, cal, dc) {}
+		BlackVarianceTermStructure(int settlementDays,
+			const Calendar& cal, const DayCounter& dc = DayCounter())
+			: BlackVolTermStructure(settlementDays, cal, dc) {}
+	protected:
+		double blackVolImpl(double t, double strike) const;
+	};
 
 }

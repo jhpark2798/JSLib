@@ -1,5 +1,7 @@
 #include "BlackVolTermStructure.h"
 
+#include <cmath>
+
 namespace JSLib {
 
 	double BlackVolTermStructure::blackVol(const Date& maturity,
@@ -32,6 +34,16 @@ namespace JSLib {
 		return blackVarianceImpl(maturity, strike);
 	}
 
+	double BlackVolatilityTermStructure::blackVarianceImpl(
+		double t, double strike) const {
+		double vol = blackVolImpl(t, strike);
+		return vol * vol * t;
+	}
 
+	double BlackVarianceTermStructure::blackVolImpl(
+		double t, double strike) const {
+		double var = blackVarianceImpl(t, strike);
+		return std::sqrt(var / t);
+	}
 
 }
