@@ -37,17 +37,15 @@ namespace JSLib {
 	}
 
 	double BlackVarianceCurve::maxStrike() const {
-		return -1;
+		return 999999;
 	}
 
 	double BlackVarianceCurve::blackVarianceImpl(double t, double) const {
 		JS_REQUIRE(t >= 0, "t must be greater than or equal to 0");
-		if (t <= times_.back() && t >= 0) {
+		if (t <= times_.back() && t >= 0) 
 			return varianceCurve_(t, true);
-		}
-		else {
+		else
 			varianceCurve_(times_.back(), true)* t / times_.back();
-		}
 	}
 
 }

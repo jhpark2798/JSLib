@@ -44,7 +44,7 @@ namespace JSLib {
 
 		template <class Interpolator>
 		void setInterpolation(const Interpolator& i = Interpolator()) {
-			varianceCurve_ = i.interpolate(times_.begin(), times_end(), variances_.begin());
+			varianceCurve_ = i.interpolate(times_.begin(), times_.end(), variances_.begin());
 			varianceCurve_.update();
 			notifyObservers();
 		}

@@ -13,6 +13,7 @@
 #include "Settings.h"
 #include "Math/LinearInterpolation.h"
 #include "TermStructure/InterpolatedZeroCurve.h"
+#include "TermStructure/BlackVarianceCurve.h"
 
 using std::cout;
 using std::endl;
@@ -62,9 +63,16 @@ int main() {
 	std::vector<double> yields = { 0.02, 0.03, 0.032, 0.04 };
 	// object slicing은 위험하다고 알고 있는데 이런 코드를 만드는게 잘하는 일인가?
 	InterpolatedZeroCurve<Linear> yieldStructure(dates, yields, Actual365());
-	cout << yieldStructure.zeroRate(Date(2020, 3, 30), Actual365(), Continuous) << endl;
-	return 0;
+	cout << yieldStructure.zeroRate(Date(2020, 8, 9), Actual365(), Continuous) << endl;
 
+	// BlackVarianceCurve example
+	Date refDate = dates[0];
+	dates.erase(dates.begin());
+	std::vector<double> vols = { 0.2, 0.18, 0.16 };
+	BlackVarianceCurve volStructure(refDate, dates, vols, Actual365());
+	cout << volStructure.blackVol(Date(2020, 8, 9), 100) << endl;
+	
+	return 0;
 }
 
 

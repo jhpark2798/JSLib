@@ -20,7 +20,7 @@ namespace JSLib {
 	}
 
 	double BlackVolTermStructure::blackVariance(const Date& maturity,
-		double strike, bool extrapolate = false) const {
+		double strike, bool extrapolate) const {
 		checkRange(maturity, extrapolate);
 		checkStrike(strike, extrapolate);
 		double t = timeFromReference(maturity);
@@ -28,7 +28,7 @@ namespace JSLib {
 	}
 
 	double BlackVolTermStructure::blackVariance(double maturity,
-		double strike, bool extrapolate = false) const {
+		double strike, bool extrapolate) const {
 		checkRange(maturity, extrapolate);
 		checkStrike(strike, extrapolate);
 		return blackVarianceImpl(maturity, strike);

@@ -49,7 +49,7 @@ namespace JSLib {
 			JS_REQUIRE(extrapolate || allowsExtrapolation() || impl_->isInRange(x),
 				"invalid interpolation range");
 		}
-	public:
+	public:	// interface
 		Interpolation() {}
 		virtual ~Interpolation() {}
 		typedef double argument_type;	// ¾îµû ¾¸?
