@@ -26,8 +26,8 @@ namespace JSLib {
 		};
 
 		virtual ~StochasticProcess() {}
-		virtual size_t size() const = 0;
-		virtual size_t factors() const;
+		virtual size_t size() const = 0;	// processÀÇ °¹¼ö
+		virtual size_t factors() const; // brownian motionÀÇ °¹¼ö
 		virtual Disposable<Array> initialValues() const = 0;
 		virtual Disposable<Array> drift(double t, const Array& x) const = 0;
 		virtual Disposable<Matrix> diffusion(double t, const Array& x) const = 0;

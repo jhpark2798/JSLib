@@ -22,7 +22,7 @@ namespace JSLib {
 		double sigma = process_->diffusion(1);
 		double r = r_;
 		double K = arguments_.payoff->strike();
-		//results_.value = blackFormula(type, spot, r, sigma, tau, K);
+		// results_.value = blackFormula(type, spot, r, sigma, tau, K);
 		// greek 계산 코드 추가 필요
 		BlackCalculator black(payoff, spot, sigma, r, arguments_.exercise->lastDate(), 0);
 		results_.value = black.value();

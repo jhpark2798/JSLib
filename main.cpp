@@ -26,7 +26,7 @@ void zeroCurveEx();
 void varianceCurveEx();
 
 int main() {
-	varianceCurveEx();
+	varianceCurveEx();	
 	return 0;
 }
 
