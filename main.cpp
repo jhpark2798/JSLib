@@ -14,6 +14,7 @@
 #include "Math/LinearInterpolation.h"
 #include "TermStructure/InterpolatedZeroCurve.h"
 #include "TermStructure/BlackVarianceCurve.h"
+#include "TimeGrid.h"
 
 using std::cout;
 using std::endl;
@@ -24,9 +25,11 @@ void dayCountEx();
 void linearInterpolationEx();
 void zeroCurveEx();
 void varianceCurveEx();
+void timeGridEx();
 
 int main() {
 	varianceCurveEx();	
+	timeGridEx();
 	return 0;
 }
 
@@ -91,4 +94,11 @@ void varianceCurveEx() {
 	std::vector<double> vols = { 0.2, 0.18, 0.16 };
 	BlackVarianceCurve volStructure(refDate, dates, vols, Actual365());
 	cout << volStructure.blackVol(Date(2020, 8, 9), 100) << endl;
+}
+
+void timeGridEx() {
+	// 첫번째 인수를 double type으로 넣어야 원하는 생성자가 호출됨
+	TimeGrid grid = TimeGrid(1.0, 12);	 
+	cout << grid[1] << endl;
+	cout << grid[5] << endl;
 }

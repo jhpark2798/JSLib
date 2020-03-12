@@ -2,9 +2,12 @@
 
 #include <limits>
 #include <stdexcept>
+#include <cmath>
 
 #define NULL_DOUBLE std::numeric_limits<double>::quiet_NaN()
 #define NULL_INT std::numeric_limits<int>::quiet_NaN()
+
+#define JS_EPSILON 10e-6
 
 #define JS_REQUIRE(condition,message) \
 if (!(condition)) { \
@@ -16,6 +19,9 @@ if (!(condition)) { \
 namespace JSLib {
 
 	enum OptionType { Call = 1, Put = -1 };
+
+	bool close_enough(double x, double y, std::size_t n);
+	bool close_enough(double x, double y);
 
 }
 
