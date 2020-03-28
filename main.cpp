@@ -102,3 +102,4 @@ void timeGridEx() {
 	cout << grid[1] << endl;
 	cout << grid[5] << endl;
 }
+
