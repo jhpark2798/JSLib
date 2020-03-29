@@ -8,8 +8,9 @@ namespace JSLib {
 	class RandomSequenceGenerator {
 	public:
 		typedef Sample<std::vector<double>> sample_type;
+		
 		RandomSequenceGenerator(std::size_t dimensionality, const RNG& rng)
-			: dimensionality_(dimensionality) rng_(rng),
+			: dimensionality_(dimensionality), rng_(rng),
 			sequence_(std::vector<double>(dimensionality), 1.0) {}
 
 		const sample_type& nextSequence() const {

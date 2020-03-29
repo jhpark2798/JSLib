@@ -21,11 +21,12 @@ namespace JSLib {
 		std::vector<Path> multiPath_;
 	};
 
-	inline MultiPath::MultiPath(size_t nAsset, const TimeGrid& timeGrid) : multiPath_(nAsset, Path(timeGrid))
-	{
+	inline MultiPath::MultiPath(size_t nAsset, const TimeGrid& timeGrid) 
+		: multiPath_(nAsset, Path(timeGrid)) {
 		JS_REQUIRE(nAsset > 0, "number of asset must be positive");
 	}
 
-	inline MultiPath::MultiPath(const std::vector<Path>& multiPath) : multiPath_(multiPath) {}
+	inline MultiPath::MultiPath(const std::vector<Path>& multiPath) 
+		: multiPath_(multiPath) {}
 
 }

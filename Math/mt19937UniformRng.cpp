@@ -3,9 +3,9 @@
 namespace JSLib {
 
 	mt19937UniformRng::mt19937UniformRng(unsigned int seed)
-		: rd(), gen(seed),	engine(0.0,1.0) {
+		: gen(seed),	engine(0.0,1.0) {
 		if (seed == 0)
-			gen.seed(rd());
+			gen.seed(std::random_device{}());
 	}
 
 	mt19937UniformRng::sample_type mt19937UniformRng::next() const {

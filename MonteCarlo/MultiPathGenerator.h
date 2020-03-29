@@ -45,8 +45,9 @@ namespace JSLib {
 			throw std::runtime_error("Brownian bridge not supported");
 		}
 		typedef typename GSG::sample_type sequence_type;
-		const sequence_type& sequence_ =
-			antithetic ? generator_.lastSequence() : generator_.nextSequence();
+		//const sequence_type& sequence_ =
+		//	antithetic ? generator_.lastSequence() : generator_.nextSequence();
+		const sequence_type& sequence_ = generator_.nextSequence();
 		std::size_t m = process_->size(), n = process_->factors();
 		MultiPath& path = next_.value;
 		Array asset = process_->initialValues();

@@ -1,5 +1,7 @@
 #pragma once
 #include "Stochasticprocess.h"
+#include "../Math/Array.h"
+#include "..//Math/Matrix.h"
 
 namespace JSLib {
 

@@ -15,6 +15,11 @@
 #include "TermStructure/InterpolatedZeroCurve.h"
 #include "TermStructure/BlackVarianceCurve.h"
 #include "TimeGrid.h"
+#include "Process/GeometricBrownianProcess.h"
+#include "MonteCarlo/MultiPath.h"
+#include "MonteCarlo/MultiPathGenerator.h"
+#include "Math/mt19937NormalRng.h"
+#include "MonteCarlo/RandomSequenceGenerator.h"
 
 using std::cout;
 using std::endl;
@@ -26,10 +31,11 @@ void linearInterpolationEx();
 void zeroCurveEx();
 void varianceCurveEx();
 void timeGridEx();
+void gbmEx();
+void multiPathEx();
 
 int main() {
-	varianceCurveEx();	
-	timeGridEx();
+	multiPathEx();
 	return 0;
 }
 
@@ -103,3 +109,32 @@ void timeGridEx() {
 	cout << grid.size() << endl;
 }
 
+void gbmEx() {
+	GeometricBrownianMotionProcess process(0, 0.02, 0.2);
+	cout << process.x0() << endl;
+	cout << process.drift(0, 100) << endl; // mu*S
+	cout << process.diffusion(0, 100) << endl; // sigma*S
+	cout << process.expectation(0, 100, 0.01) << endl; // S0+mu*S*dt
+	cout << process.stdDeviation(0, 100, 0.01) << endl; // sigma*S*dt*dt
+	cout << process.evolve(0, 100, 0.01, 1) << endl;
+	
+}
+
+void multiPathEx() {
+	mt19937NormalRng rng;
+	RandomSequenceGenerator<mt19937NormalRng> generator(12, rng);
+	std::shared_ptr<GeometricBrownianMotionProcess> process = 
+		std::make_shared<GeometricBrownianMotionProcess>(100, 0.02, 0.2);
+	TimeGrid timeGrid(1.0, 12);
+	MultiPathGenerator<RandomSequenceGenerator<mt19937NormalRng>>
+		pathGenerator(process, timeGrid, generator, false);
+	typedef MultiPathGenerator<
+		RandomSequenceGenerator<mt19937NormalRng>>::sample_type
+		sample;
+	sample s = pathGenerator.next();
+	cout << s.value.pathSize() << endl;
+	for (int i = 0; i < s.value.pathSize(); ++i) {
+		cout << s.value[0][i] << " ";
+	}
+	cout << endl;
+}

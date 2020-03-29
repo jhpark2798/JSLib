@@ -15,7 +15,6 @@ namespace JSLib {
 		double nextReal() const;
 
 	private:
-		std::random_device rd;
 		mutable std::mt19937_64 gen;
 		mutable std::normal_distribution<double> engine;
 	};
