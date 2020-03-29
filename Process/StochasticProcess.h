@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Time/Date.h"
-#include "DesignPattern/Observer.h"
-#include "Math/Matrix.h"
+#include "../Time/Date.h"
+#include "../DesignPattern/Observer.h"
+#include "../Math/Matrix.h"
 
 namespace JSLib {
 

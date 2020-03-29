@@ -1,5 +1,5 @@
 #include "stochasticprocess.h"
-#include "Utility.h"
+#include "../Utility.h"
 
 namespace JSLib {
 

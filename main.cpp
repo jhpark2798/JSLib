@@ -7,7 +7,7 @@
 #include "AnalyticEuropeanEngine.h"
 #include "Time/Date.h"
 #include "Time/Actual365.h"
-#include "GBMProcess.h"
+#include "Process/GBMProcess.h"
 #include "Payoff.h"
 #include "Exercise.h"
 #include "Settings.h"
@@ -98,8 +98,8 @@ void varianceCurveEx() {
 
 void timeGridEx() {
 	// 첫번째 인수를 double type으로 넣어야 원하는 생성자가 호출됨
-	TimeGrid grid = TimeGrid(1.0, 12);	 
+	TimeGrid grid = TimeGrid(10, 4);	 
 	cout << grid[1] << endl;
-	cout << grid[5] << endl;
+	cout << grid.size() << endl;
 }
 

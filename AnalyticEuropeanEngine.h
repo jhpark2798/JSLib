@@ -1,7 +1,7 @@
 #pragma once
 
 #include "VanillaOption.h"
-#include "GBMProcess.h"
+#include "Process/GBMProcess.h"
 #include "Utility.h"
 
 namespace JSLib {

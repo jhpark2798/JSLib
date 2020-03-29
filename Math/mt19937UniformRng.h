@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Sample.h"
+#include "../MonteCarlo/Sample.h"
 
 #include <random>
 
