@@ -39,8 +39,8 @@ namespace JSLib {
 		Array values_;
 	};
 
-	inline Path::Path(const TimeGrid& timeGrid, const Array& values) : timeGrid_(timeGrid), values_(values)
-	{
+	inline Path::Path(const TimeGrid& timeGrid, const Array& values) 
+		: timeGrid_(timeGrid), values_(values) {
 		if (values_.empty())
 			values_ = Array(timeGrid_.size());
 		JS_REQUIRE(values_.size() == timeGrid_.size(), "different number of times and asset values");

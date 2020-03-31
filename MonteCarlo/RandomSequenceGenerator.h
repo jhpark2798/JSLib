@@ -22,6 +22,12 @@ namespace JSLib {
 			}
 			return sequence_;
 		}
+
+		std::size_t dimension() const { return dimensionality_; }
+
+		const sample_type& lastSequence() const {
+			return sequence_;
+		}
 	
 	private:
 		std::size_t dimensionality_;

@@ -21,8 +21,7 @@ namespace JSLib {
 		const sample_type& next() const { return next(false); }
 		const sample_type& antithetic() const { return next(true); }
 	private:
-		// 
-		const sample_type& next(bool antithetic) const; // antithetic=최근에만들었던거쓸거냐?
+		const sample_type& next(bool antithetic) const; 
 		bool brownianBridge_; // 무슨역할?
 		std::shared_ptr<StochasticProcess> process_;
 		GSG generator_;
