@@ -20,6 +20,7 @@
 #include "MonteCarlo/MultiPathGenerator.h"
 #include "Math/mt19937NormalRng.h"
 #include "MonteCarlo/RandomSequenceGenerator.h"
+#include "Math/GeneralStatistics.h"
 
 using std::cout;
 using std::endl;
@@ -33,9 +34,10 @@ void varianceCurveEx();
 void timeGridEx();
 void gbmEx();
 void multiPathEx();
+void statisticsEx();
 
 int main() {
-	multiPathEx();
+	statisticsEx();
 	return 0;
 }
 
@@ -137,4 +139,12 @@ void multiPathEx() {
 		cout << s.value[0][i] << " ";
 	}
 	cout << endl;
+}
+
+void statisticsEx() {
+	GeneralStatistics statistics;
+	for (int i = 1; i <= 10; ++i) {
+		statistics.add(i);
+	}
+	cout << statistics.mean() << endl;
 }
