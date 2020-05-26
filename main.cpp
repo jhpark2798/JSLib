@@ -147,4 +147,5 @@ void statisticsEx() {
 		statistics.add(i);
 	}
 	cout << statistics.mean() << endl;
+	cout << statistics.variance() << endl;
 }
