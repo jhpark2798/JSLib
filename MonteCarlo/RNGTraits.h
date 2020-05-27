@@ -12,7 +12,7 @@ namespace JSLib {
 		enum { allowsErrorEstimate = 1 };
 		static rsg_type make_sequence_generator(std::size_t dimension, int seed) {
 			rng_type gng(seed);
-			return rsg_type(dimension, gng);
+			return rsg_type(dimension, gng);	// dimension : length of sequence
 		}
 	};
 

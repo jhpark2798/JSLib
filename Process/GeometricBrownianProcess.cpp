@@ -1,4 +1,6 @@
 #include "GeometricBrownianProcess.h"
+#include "..//Time/Date.h"
+#include "..//Settings.h"
 
 namespace JSLib {
 
@@ -17,6 +19,11 @@ namespace JSLib {
 
 	double GeometricBrownianMotionProcess::diffusion(double, double x) const {
 		return sigma_ * x;
+	}
+
+	// 임시방편
+	double GeometricBrownianMotionProcess::time(const Date& d) const {
+		return daysBetween(Settings::instance().evaluationDate(), d) / 365.0;
 	}
 
 }

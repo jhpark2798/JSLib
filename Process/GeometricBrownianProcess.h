@@ -14,6 +14,8 @@ namespace JSLib{
 		double x0() const;
 		double drift(double t, double x) const;
 		double diffusion(double t, double x) const;
+		double time(const Date& d) const;
+
 	protected:
 		double initialValue_;
 		double mue_;

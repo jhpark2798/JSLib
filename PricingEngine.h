@@ -32,7 +32,7 @@ namespace JSLib {
 	};
 
 	template <class ArgumentsType, class ResultsType>
-	class GenericEngine : public PricingEngine {
+	class GenericEngine : public PricingEngine,  public Observer {
 	public:
 		GenericEngine() {}
 		// pointer를 리턴할거면 캡슐화는 뭐하러 했지?
@@ -43,6 +43,7 @@ namespace JSLib {
 			return &results_;
 		}
 		void reset() const { results_.reset(); }
+		void update() { notifyObservers(); }
 	protected:
 		mutable ArgumentsType arguments_;
 		mutable ResultsType results_;
