@@ -15,16 +15,20 @@ namespace JSLib {
 		std::shared_ptr<PlainVanillaPayoff> payoff =
 			std::dynamic_pointer_cast<PlainVanillaPayoff>(arguments_.payoff);
 		JS_REQUIRE(payoff, "not an PlainVanillaPayoff");
-		JS_REQUIRE(process_, "GBM Process needed");
+		std::shared_ptr<GeometricBrownianMotionProcess> process =
+			std::dynamic_pointer_cast<GeometricBrownianMotionProcess>(process_);
+		JS_REQUIRE(process, "GeometricBrownianMotionProcess needed");
 		OptionType type = payoff->optionType();
 		Date evalDate = Settings::instance().evaluationDate();
-		double spot = process_->x0();
-		double sigma = process_->diffusion(1);
-		double r = r_;
+		double spot = process->x0();
+		Date maturityDate = arguments_.exercise->lastDate();
+		double t = process->time(maturityDate);
+		double sigma = process->diffusion(1, 1);
+		double r = process->riskFreeRate()->zeroRate(t,Continuous).rate();
 		double K = arguments_.payoff->strike();
 		// results_.value = blackFormula(type, spot, r, sigma, tau, K);
 		// greek 계산 코드 추가 필요
-		BlackCalculator black(payoff, spot, sigma, r, arguments_.exercise->lastDate(), 0);
+		BlackCalculator black(payoff, spot, sigma, r, maturityDate, 0);
 		results_.value = black.value();
 		results_.delta = black.delta();
 		results_.gamma = black.gamma();

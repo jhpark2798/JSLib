@@ -4,6 +4,7 @@
 #include "MonteCarloModel.h"
 #include "..//TimeGrid.h"
 #include "..//PricingEngine.h"
+#include "..//Null.h"
 
 #include <limits>
 
@@ -32,7 +33,7 @@ namespace JSLib {
 		const stats_type& sampleAccumulator() const;
 		void calculate(double requiredTolerance, size_t requiredSamples, size_t maxSamples) const;
 	protected:
-		McSimulation(bool antitheticVariate, bool controlVairate)
+		McSimulation(bool antitheticVariate, bool controlVariate)
 			: antitheticVariate_(antitheticVariate), controlVariate_(controlVariate) {}
 		virtual std::shared_ptr<path_pricer_type> pathPricer() const = 0;
 		virtual std::shared_ptr<path_generator_type> pathGenerator() const = 0;
@@ -80,7 +81,7 @@ namespace JSLib {
 			order = maxError(error * error) / tolerance / tolerance;
 			nextBatch = size_t(std::max<double>(
 				static_cast<double>(sampleNumber) * order * 0.8 - static_cast<double>(sampleNumber),
-				statc_cast<double>(minSamples)));
+				static_cast<double>(minSamples)));
 			sampleNumber += nextBatch;
 			mcModel_->addSamples(nextBatch);
 			error = result_type(mcModel_->sampleAccumulator().errorEstimate());
@@ -112,10 +113,29 @@ namespace JSLib {
 	template<template<class> class MCTraits, class RNGTraits, class S>
 	void McSimulation<MCTraits, RNGTraits, S>::calculate(double requiredTolerance,
 		size_t requiredSamples, size_t maxSamples) const {
-		JS_REQUIRE(requiredTolerance != Null<double>() || requiredSamples != Null<size_t>(),
+		JS_REQUIRE(requiredTolerance != static_cast<double>(Null<double>()) || 
+			requiredSamples != static_cast<size_t>(Null<size_t>()),
 			"tolerance and sample size both are null");
-		if (requiredTolerance != Null<double>()) {
-			if (maxSamples != Null<size_t>())
+		// initialized the one-factor Monte Carlo
+		if (this->controlVariate_) {
+			result_type controlVariateValue = this->controlVariateValue();
+			JS_REQUIRE(controlVariateValue != Null<result_type>(),
+				"engine does not provide control-variation price");
+			std::shared_ptr<path_pricer_type> controlPathPricer = this->controlPathPricer();
+			JS_REQUIRE(controlPathPricer,
+				"engine does not provide control-variation path pricer");
+			std::shared_ptr<path_generator_type> controlPathGenerator =
+				this->controlPathGenerator();
+			this->mcModel_ = std::make_shared<MonteCarloModel<MCTraits, RNGTraits, S>>(
+				pathGenerator(), pathPricer(), stats_type(), antitheticVariate_,
+				controlPathPricer, controlVariateValue, controlPathGenerator);
+		} else {
+			this->mcModel_ = std::make_shared<MonteCarloModel<MCTraits, RNGTraits, S>>(
+				pathGenerator(), pathPricer(), S(), antitheticVariate_);
+		}
+		// 진짜 계산
+		if (requiredTolerance != static_cast<double>(Null<double>())) {
+			if (maxSamples != static_cast<size_t>(Null<size_t>()))
 				this->value(requiredTolerance, maxSamples);
 			else
 				this->value(requiredTolerance);

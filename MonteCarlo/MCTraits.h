@@ -3,6 +3,7 @@
 #include "RNGTraits.h"
 #include "PathGenerator.h"
 #include "MultiPathGenerator.h"
+#include "PathPricer.h"
 
 namespace JSLib{
 

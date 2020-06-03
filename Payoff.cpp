@@ -4,7 +4,7 @@
 namespace JSLib {
 
 	double PlainVanillaPayoff::operator()(double price) const {
-		return std::max(type_ * (price - strike_), 0.0);
+		return std::max(static_cast<int>(type_) * (price - strike_), 0.0);
 	}
 
 }

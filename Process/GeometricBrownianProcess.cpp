@@ -5,9 +5,11 @@
 namespace JSLib {
 
 	GeometricBrownianMotionProcess::GeometricBrownianMotionProcess(
-		double initialValue, double mue, double sigma)
+		double initialValue, double mue, double sigma,
+		const std::shared_ptr<YieldTermStructure>& riskFreeRate)
 		: StochasticProcess1D(std::shared_ptr<discretization>(new EulerDiscretization)),
-		initialValue_(initialValue), mue_(mue), sigma_(sigma) {}
+		initialValue_(initialValue), mue_(mue), sigma_(sigma),
+		riskFreeRate_(riskFreeRate) {}
 
 	double GeometricBrownianMotionProcess::x0() const {
 		return initialValue_;
@@ -23,7 +25,7 @@ namespace JSLib {
 
 	// 임시방편
 	double GeometricBrownianMotionProcess::time(const Date& d) const {
-		return daysBetween(Settings::instance().evaluationDate(), d) / 365.0;
+		return daysBetween(riskFreeRate_->referenceDate(), d) / 365.0;
 	}
 
 }

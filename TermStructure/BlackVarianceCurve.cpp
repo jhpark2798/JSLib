@@ -42,8 +42,12 @@ namespace JSLib {
 
 	double BlackVarianceCurve::blackVarianceImpl(double t, double) const {
 		JS_REQUIRE(t >= 0, "t must be greater than or equal to 0");
-		if (t <= times_.back() && t >= 0) 
-			return varianceCurve_(t, true);
+		if (t <= times_.back() && t >= 0) {
+			if (t == 0) t += 0.001;
+			double res = varianceCurve_(t, true);
+			return res;
+			// return varianceCurve_(t, true);
+		}
 		else
 			varianceCurve_(times_.back(), true)* t / times_.back();
 	}

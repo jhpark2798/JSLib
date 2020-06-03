@@ -4,6 +4,8 @@
 #include "VanillaOption.h"
 #include "Math/GeneralStatistics.h"
 #include "Time/Date.h"
+#include "Null.h"
+#include "DesignPattern/Observer.h"
 
 namespace JSLib {
 
@@ -27,9 +29,9 @@ namespace JSLib {
 				bool brownianBridge, bool antitheticVariate, bool controlVariate,
 				size_t requiredSamples, double requiredTolerance,
 				size_t maxSamples, int seed);
-			TimeGrid timeGrid() const;
-			std::shared_ptr<path_generator_type> pathGenerator() const;
-			result_type controlVariateValue() const;
+			TimeGrid timeGrid() const override;
+			std::shared_ptr<path_generator_type> pathGenerator() const override;
+			result_type controlVariateValue() const override;
 
 			std::shared_ptr<StochasticProcess> process_;
 			size_t timeSteps_, timeStepsPerYear_;
@@ -56,20 +58,25 @@ namespace JSLib {
 		bool brownianBridge, bool antitheticVariate, bool controlVariate,
 		size_t requiredSamples, double requiredTolerance,
 		size_t maxSamples, int seed) 
-		: McSimulation(antitheticVariate, controlVariate), process_(process),
-			timeSteps_(timeSteps), timeStepsPerYear_(timeStepsPerYear), 
+		: McSimulation<MCTraits, RNGTraits, S>(antitheticVariate, controlVariate), 
+			process_(process),	timeSteps_(timeSteps), timeStepsPerYear_(timeStepsPerYear), 
 			requiredSamples_(requiredSamples), maxSamples_(maxSamples), 
 			requiredTolerance_(requiredTolerance), brownianBridge_(brownianBridge), 
 			seed_(seed) {
-		JS_REQUIRE(timeSteps != Null<size_t>() || timeStepsPerYear != Null<size_t>(),
+		JS_REQUIRE(timeSteps != static_cast<size_t>(Null<size_t>()) || 
+			timeStepsPerYear != static_cast<size_t>(Null<size_t>()),
 			"no time steps provided");
-		JS_REQUIRE(timeSteps == Null<size_t>() || timeStepsPerYear == Null<size_t>(),
+		JS_REQUIRE(timeSteps == static_cast<size_t>(Null<size_t>()) || 
+			timeStepsPerYear == static_cast<size_t>(Null<size_t>()),
 			"both time steps and time steps per year were provided");
 		JS_REQUIRE(timeSteps != 0, 
-			"timeSteps must be positive, " << timeSteps << " not allowed");
+			"timeSteps must be positive");
 		JS_REQUIRE(timeStepsPerYear != 0,
-			"timeStepsPerYear must be positive, " << timeStepsPerYear << " not allowed");
-		this->registerWith(process_);
+			"timeStepsPerYear must be positive");
+		// process_는 Observable이 아니라 등록이 안되고 Observable로 캐스팅하면
+		// rvalue라 등록이 안되는것 같은데 어떻게 함?
+		// this->registerWith(process_);
+		// this->registerWith(std::dynamic_pointer_cast<Observable>(process_));
 	}
 
 	// 멤버변수로 TimeGrid를 가지고 있으면 되지 왜 새로 만드는지 모르겠음
@@ -100,7 +107,7 @@ namespace JSLib {
 	}
 
 	template<template <class> class MCTraits, class RNGTraits, class S, class Inst>
-	McVanillaEngine<MCTraits, RNGTraits, S, Inst>::result_type 
+	typename McVanillaEngine<MCTraits, RNGTraits, S, Inst>::result_type 
 		McVanillaEngine<MCTraits, RNGTraits, S, Inst>::controlVariateValue() const {
 		std::shared_ptr<PricingEngine> controlPE = this->controlPricingEngine();
 		JS_REQUIRE(controlPE, "engine does not provide ");

@@ -22,13 +22,14 @@ namespace JSLib {
 			static int nullValue() { return (std::numeric_limits<int>::max)(); }
 		};
 
-		template <typename T>
-		class Null {
-		public:
-			Null() {}
-			operator T() const { return T(detail::FloatingPointNull<boost::is_floating_point<T>::value>::nullValue()); }
-		};
-
 	}
+
+	template <typename T>
+	class Null {
+	public:
+		Null() {}
+		operator T() const { return T(detail::FloatingPointNull<boost::is_floating_point<T>::value>::nullValue()); }
+		// operator T() const { return std::numeric_limits<T>::quiet_NaN(); }
+	};
 
 }

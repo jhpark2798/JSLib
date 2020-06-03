@@ -17,13 +17,13 @@ namespace JSLib{
 		const sample_type& next() const;
 		const sample_type& antithetic() const;
 		std::size_t size() const { return dimension_; }
-		const TimeGrid& timeGrid() const { return timeGrd_; }
+		const TimeGrid& timeGrid() const { return timeGrid_; }
 	private:
 		const sample_type& next(bool antithetic) const;
 		bool brownianBridge_;
 		GSG generator_;
 		std::size_t dimension_;
-		TimeGrid timeGrid;
+		TimeGrid timeGrid_;
 		std::shared_ptr<StochasticProcess1D> process_;
 		mutable sample_type next_;
 		mutable std::vector<double> temp_;
@@ -69,7 +69,7 @@ namespace JSLib{
 		for (std::size_t i = 1; i < path.length(); ++i) {
 			double t = timeGrid_[i - 1];
 			double dt = timeGrid_.dt(i - 1);
-			path[i] = process_->evolve(t, path[i - 1], dt, antithetic ? -temp[i - 1] : temp[i - 1]);
+			path[i] = process_->evolve(t, path[i - 1], dt, antithetic ? -temp_[i - 1] : temp_[i - 1]);
 		}
 		return next_;
 	}

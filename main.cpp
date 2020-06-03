@@ -21,12 +21,16 @@
 #include "Math/mt19937NormalRng.h"
 #include "MonteCarlo/RandomSequenceGenerator.h"
 #include "Math/GeneralStatistics.h"
+#include "McEuropeanEngine.h"
+#include "Process/GeneralizedBlackScholesProcess.h"
+#include "SimpleQuote.h"
 
 using std::cout;
 using std::endl;
 using namespace JSLib;
 
 void plainVanillaEx();
+void mcEx();
 void dayCountEx();
 void linearInterpolationEx();
 void zeroCurveEx();
@@ -37,26 +41,77 @@ void multiPathEx();
 void statisticsEx();
 
 int main() {
-	statisticsEx();
+	 plainVanillaEx();
+	mcEx();
 	return 0;
 }
 
 void plainVanillaEx() {
 	// plain vanilla call option pricing example
-	std::shared_ptr<GBMProcess> process = std::make_shared<GBMProcess>(100, 0, 0.2);
-	double riskLessRate = 0.02;
 	Date today = Date(2019, 11, 18);
+	Settings::instance().evaluationDate() = today;
+	std::vector<Date> dates = { today, Date(2030,8,10) };
+	std::vector<double> yields = { 0.02, 0.02 };
+	std::shared_ptr<YieldTermStructure> yieldStructure
+		= std::make_shared<InterpolatedZeroCurve<Linear>>(dates, yields, Actual365());
+	std::shared_ptr<StochasticProcess1D> process 
+		= std::make_shared<GeometricBrownianMotionProcess>(100, 0, 0.2, yieldStructure);
 	Date maturDate(2019, 12, 18);
 	OptionType optionType = Call;
 	double strike = 100;
-	Settings::instance().evaluationDate() = today;
 	std::shared_ptr<PricingEngine> engine = 
-		std::make_shared<AnalyticEuropeanEngine>(process, riskLessRate);
+		std::make_shared<AnalyticEuropeanEngine>(process);
 	std::shared_ptr<Payoff> payoff = std::make_shared<PlainVanillaPayoff>(optionType, strike);
 	std::shared_ptr<Exercise> exercise = std::make_shared<EuropeanExercise>(maturDate);
 	VanillaOption option(payoff, exercise);
 	option.setPricingEngine(engine);
 
+	cout << "Analytic engine" << endl;
+	cout << "price : " << option.NPV() << endl;
+	cout << "delta : " << option.delta() << endl;
+	cout << "gamma : " << option.gamma() << endl;
+	cout << "theta : " << option.theta() << endl;
+	cout << "vega : " << option.vega() << endl;
+	cout << "rho : " << option.rho() << endl;
+	cout << endl;
+}
+
+void mcEx() {
+	// plain vanilla call option pricing example
+	Date today(2019, 11, 18);
+	Settings::instance().evaluationDate() = today;
+	Date maturDate(2019, 12, 18);
+	std::vector<Date> dates = { today, Date(2030,8,10) };
+	std::vector<double> riskFreeRate = { 0.02, 0.02 };
+	std::shared_ptr<YieldTermStructure> riskFreeTS
+		= std::make_shared<InterpolatedZeroCurve<Linear>>(dates, riskFreeRate, Actual365());
+	std::vector<double> dividendRate = { 0.0, 0.0 };
+	std::shared_ptr<YieldTermStructure> dividendTS =
+		std::make_shared<InterpolatedZeroCurve<Linear>>(dates, dividendRate, Actual365());
+	std::vector<Date> dates_vol(dates.begin() + 1, dates.end());
+	std::vector<double> blackVol = { 0.2 };
+	std::shared_ptr<BlackVolTermStructure> blackVolTS =
+		std::make_shared<BlackVarianceCurve>(dates.front(), dates_vol, blackVol, Actual365());
+	std::shared_ptr<Quote> x0 = std::make_shared<SimpleQuote>(100);
+	std::shared_ptr<GeneralizedBlackScholesProcess> process
+		= std::make_shared<GeneralizedBlackScholesProcess>(
+			x0, dividendTS, riskFreeTS, blackVolTS);
+	OptionType optionType = Call;
+	double strike = 100;
+	std::shared_ptr<Payoff> payoff = std::make_shared<PlainVanillaPayoff>(optionType, strike);
+	std::shared_ptr<Exercise> exercise = std::make_shared<EuropeanExercise>(maturDate);
+	VanillaOption option(payoff, exercise);
+
+	size_t timeSteps = 1;
+	int mcSeed = 0;
+	std::shared_ptr<PricingEngine> mcEngine =
+		MakeMcEuropeanEngine<PseudoRandom>(process)
+		.withSteps(timeSteps)
+		.withSamples(1000000)
+		.withSeed(mcSeed);
+	option.setPricingEngine(mcEngine);
+
+	cout << "Monte carlo engine" << endl;
 	cout << "price : " << option.NPV() << endl;
 	cout << "delta : " << option.delta() << endl;
 	cout << "gamma : " << option.gamma() << endl;
@@ -112,7 +167,11 @@ void timeGridEx() {
 }
 
 void gbmEx() {
-	GeometricBrownianMotionProcess process(0, 0.02, 0.2);
+	std::vector<Date> dates = { Date(2020,1,30), Date(2030,8,10) };
+	std::vector<double> yields = { 0.02, 0.02 };
+	std::shared_ptr<YieldTermStructure> yieldStructure
+		= std::make_shared<InterpolatedZeroCurve<Linear>>(dates, yields, Actual365());
+	GeometricBrownianMotionProcess process(0, 0.02, 0.2, yieldStructure);
 	cout << process.x0() << endl;
 	cout << process.drift(0, 100) << endl; // mu*S
 	cout << process.diffusion(0, 100) << endl; // sigma*S
@@ -125,8 +184,12 @@ void gbmEx() {
 void multiPathEx() {
 	mt19937NormalRng rng;
 	RandomSequenceGenerator<mt19937NormalRng> generator(12, rng);
-	std::shared_ptr<GeometricBrownianMotionProcess> process = 
-		std::make_shared<GeometricBrownianMotionProcess>(100, 0.02, 0.2);
+	std::vector<Date> dates = { Date(2020,1,30), Date(2030,8,10) };
+	std::vector<double> yields = { 0.02, 0.02 };
+	std::shared_ptr<YieldTermStructure> yieldStructure
+		= std::make_shared<InterpolatedZeroCurve<Linear>>(dates, yields, Actual365());
+	std::shared_ptr<StochasticProcess1D> process = 
+		std::make_shared<GeometricBrownianMotionProcess>(100, 0.02, 0.2, yieldStructure);
 	TimeGrid timeGrid(1.0, 12);
 	MultiPathGenerator<RandomSequenceGenerator<mt19937NormalRng>>
 		pathGenerator(process, timeGrid, generator, false);
