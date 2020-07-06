@@ -3,6 +3,8 @@
 #include "LazyObject.h"
 #include "PricingEngine.h"
 #include "Utility.h"
+#include "Null.h"
+
 #include <string>
 #include <memory>
 
@@ -15,7 +17,7 @@ namespace JSLib {
 		~Instrument() {}
 
 		virtual double NPV() const;
-		virtual double errorEstimate() const = 0;
+		virtual double errorEstimate() const;
 		virtual bool isExpired() const = 0;
 		void calculate() const;
 		virtual void setupExpired() const;
@@ -34,7 +36,7 @@ namespace JSLib {
 	class Instrument::results : public virtual PricingEngine::results {
 	public:
 		results() {}
-		void reset() { value = errorEstimate = NULL_DOUBLE; }
+		void reset() override { value = errorEstimate = NULL_DOUBLE; }
 		double value;	//  ¿Ö Ä¸½¶È­ ¾ÈÇÔ?
 		double errorEstimate;
 	};

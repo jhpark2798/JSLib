@@ -41,7 +41,7 @@ void multiPathEx();
 void statisticsEx();
 
 int main() {
-	 plainVanillaEx();
+	plainVanillaEx();
 	mcEx();
 	return 0;
 }
@@ -107,7 +107,7 @@ void mcEx() {
 	std::shared_ptr<PricingEngine> mcEngine =
 		MakeMcEuropeanEngine<PseudoRandom>(process)
 		.withSteps(timeSteps)
-		.withSamples(1000000)
+		.withSamples(100000)
 		.withSeed(mcSeed);
 	option.setPricingEngine(mcEngine);
 

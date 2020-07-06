@@ -8,6 +8,13 @@ namespace JSLib {
 		return NPV_;
 	}
 
+	double Instrument::errorEstimate() const {
+		calculate();
+		JS_REQUIRE(errorEstimate_ != Null<double>(),
+			"error estimate not provided");
+		return errorEstimate_;
+	}
+
 	void Instrument::calculate() const {
 		if (isExpired()) {
 			setupExpired();
