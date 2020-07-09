@@ -107,7 +107,7 @@ void mcEx() {
 	std::shared_ptr<PricingEngine> mcEngine =
 		MakeMcEuropeanEngine<PseudoRandom>(process)
 		.withSteps(timeSteps)
-		.withSamples(100000)
+		.withSamples(1000)
 		.withSeed(mcSeed);
 	option.setPricingEngine(mcEngine);
 
