@@ -8,6 +8,7 @@
 #include "Payoff.h"
 #include "Null.h"
 #include "VanillaOption.h"
+#include "Option.h"
 #include "Process/GeneralizedBlackScholesProcess.h"
 
 #include <memory>
@@ -58,10 +59,10 @@ namespace JSLib {
 
 	class EuropeanPathPricer : public PathPricer<Path> {
 	public:
-		EuropeanPathPricer(OptionType type, double strike, double discount);
+		EuropeanPathPricer(std::shared_ptr<StrikedTypePayoff>, double discount);
 		double operator()(const Path& path) const override;
 	private:
-		PlainVanillaPayoff payoff_;
+		std::shared_ptr<StrikedTypePayoff> payoff_;
 		double discount_;
 	};
 
@@ -79,18 +80,18 @@ namespace JSLib {
 	template <class RNGTraits, class S>
 	std::shared_ptr<typename McEuropeanEngine<RNGTraits, S>::path_pricer_type>
 		McEuropeanEngine<RNGTraits, S>::pathPricer() const {
-		std::shared_ptr<PlainVanillaPayoff> payoff = // check payoff type
-			std::dynamic_pointer_cast<PlainVanillaPayoff>(this->arguments_.payoff);
-		JS_REQUIRE(payoff, "non-plain payoff given");
+		std::shared_ptr<StrikedTypePayoff> payoff = // check payoff type
+			std::dynamic_pointer_cast<StrikedTypePayoff>(this->arguments_.payoff);
+		JS_REQUIRE(payoff, "non-striked type payoff given");
 		// process는 체크 안해도 되는거 아닌가?
-		// 나중에 GeneralizedBlackScholesProcess로 바꿔야 함
+		// 해야함. this->process_는 StochasticProcess임. 하지만 여기서는
+		// GeneralizedBlackScholesProcess의 인터페이스를 사용하고 싶기 때문.
 		std::shared_ptr<GeneralizedBlackScholesProcess> process = // check process type
 			std::dynamic_pointer_cast<GeneralizedBlackScholesProcess>(this->process_);
 		JS_REQUIRE(process, "geometric brownian motion process required");
-		std::shared_ptr<typename McEuropeanEngine<RNGTraits, S>::path_pricer_type> pricer =
-			std::make_shared<EuropeanPathPricer>(
-				payoff->optionType(), payoff->strike(),
-				process->riskFreeRate()->discount(this->timeGrid().back()));
+		auto pricer = std::make_shared<EuropeanPathPricer>(
+			payoff, process->riskFreeRate()->discount(this->timeGrid().back())
+			);
 		return pricer;
 	}
 
@@ -176,14 +177,14 @@ namespace JSLib {
 		return engine;
 	}
 
-	EuropeanPathPricer::EuropeanPathPricer(OptionType type, double strike, double discount)
-		: payoff_(type, strike), discount_(discount) {
-		JS_REQUIRE(strike >= 0.0, "strike less than zero not allowed");
+	EuropeanPathPricer::EuropeanPathPricer(std::shared_ptr<StrikedTypePayoff> payoff, double discount)
+		: payoff_(payoff), discount_(discount) {
+		JS_REQUIRE(payoff->strike() >= 0.0, "strike less than zero not allowed");
 	}
 
 	double EuropeanPathPricer::operator()(const Path& path) const {
 		JS_REQUIRE(path.length() > 0, "the path cannot be empty");
-		return payoff_(path.back()) * discount_;
+		return payoff_->operator()(path.back()) * discount_;
 	}
 
 }

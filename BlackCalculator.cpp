@@ -1,78 +1,124 @@
 #include "BlackCalculator.h"
 #include "Settings.h"
+#include "Utility.h"
+
 #include <boost/math/distributions/normal.hpp>
 #include <cmath>
 
 namespace JSLib {
 
-	BlackCalculator::BlackCalculator(
-		const std::shared_ptr<StrikedTypePayoff> payoff, double spot,
-		double vol, double riskLessRate, Date maturity, double div)
-		: strike_(payoff->strike()), type_(payoff->optionType()), spot_(spot),
-		vol_(vol), riskLessRate_(riskLessRate), maturity_(maturity), div_(div) {
+	class BlackCalculator::Calculator : public AcyclicVisitor,
+																	public Visitor<Payoff>,
+																	public Visitor<PlainVanillaPayoff>,
+																	public Visitor<CashOrNothingPayoff> {
+	public:
+		explicit Calculator(BlackCalculator& black) : black_(black) {}
+		void visit(Payoff&);
+		void visit(PlainVanillaPayoff&);
+		void visit(CashOrNothingPayoff&);
+	private:
+		BlackCalculator& black_;
+	};
+
+	void BlackCalculator::Calculator::visit(Payoff& p) {
+		JS_FAIL("unsupported payoff type");
+	}
+
+	void BlackCalculator::Calculator::visit(PlainVanillaPayoff& p) {
+		switch (p.optionType()) {
+		case Option::Type::Call:
+			black_.value_ = black_.discount_ * black_.forward_ * black_.cum_d1_ -
+				black_.discount_ * black_.strike_ * black_.cum_d2_;
+			black_.delta_ = black_.discount_ * black_.forward_ / black_.spot_ * black_.cum_d1_;
+			break;
+		case Option::Type::Put:
+			black_.value_ = -black_.discount_ * black_.forward_ * (1.0-black_.cum_d1_) +
+				black_.discount_ * black_.strike_ * (1-black_.cum_d2_);
+			black_.delta_ = -black_.discount_ * black_.forward_ / black_.spot_ * (1-black_.cum_d1_);
+			break;
+		}
+		black_.gamma_ = black_.strike_ * black_.discount_ * black_.n_d2_
+			/ (black_.spot_*black_.spot_*black_.stdDev_);
+		black_.theta_ = 0;
+		black_.vega_ = 0;
+		black_.rho_ = 0;
+	}
+
+	void BlackCalculator::Calculator::visit(CashOrNothingPayoff& p) {
+		switch (p.optionType()) {
+		case Option::Type::Call:
+			black_.value_ = black_.discount_ * p.cashPayoff() * black_.cum_d2_;
+			black_.delta_ = black_.discount_ * black_.n_d2_ / (black_.spot_ * black_.stdDev_);
+			break;
+		case Option::Type::Put:
+			black_.value_ = black_.discount_ * p.cashPayoff() * (1-black_.cum_d2_);
+			black_.delta_ = -black_.discount_ * black_.n_d2_ / (black_.spot_ * black_.stdDev_);
+			break;
+		}
+		black_.gamma_ = 0;
+		black_.theta_ = 0;
+		black_.vega_ = 0;
+		black_.rho_ = 0;
+	}
+
+	BlackCalculator::BlackCalculator(const std::shared_ptr<StrikedTypePayoff>& payoff,
+		double spot, double forward, double stdDev, double discount) 
+	: spot_(spot), strike_(payoff->strike()), forward_(forward), stdDev_(stdDev), 
+		discount_(discount), variance_(stdDev * stdDev) {
+		initialize(payoff);
+	}
+
+	BlackCalculator::BlackCalculator(Option::Type optionType,
+		double spot, double strike, double forward, double stdDev, double discount) 
+	: spot_(spot), strike_(strike), forward_(forward), stdDev_(stdDev), 
+		discount_(discount), variance_(stdDev*stdDev) {
+		auto p = std::make_shared<PlainVanillaPayoff>(optionType, strike);
+		initialize(p);
+	}
+
+	void BlackCalculator::initialize(const std::shared_ptr<StrikedTypePayoff>& p){
+		boost::math::normal norm;
 		using boost::math::cdf;
 		using boost::math::pdf;
-		TTM_ = daysBetween(Settings::instance().evaluationDate(), maturity) / DAY_OF_YEAR;
-		d1_ = (std::log(spot_ / strike_) 
-			+ (riskLessRate_ - div_ + 0.5 * vol_ * vol_) * TTM_) / (vol_ * std::sqrt(TTM_));
-		d2_ = d1_ - vol_ * std::sqrt(TTM_);
-		boost::math::normal norm;
-		nd1_ = pdf(norm, d1_);
-		cum_nd1_ = cdf(norm, d1_);
-		cum_n_md1_ = 1 - cum_nd1_;
-		nd2_ = pdf(norm, d2_);
-		cum_nd2_ = cdf(norm, d2_);
-		cum_n_md2_ = 1 - cum_nd2_;
-		divDf_ = std::exp(-div_ * TTM_);
-		yieldDf_ = std::exp(-riskLessRate_ * TTM_);
+		if (stdDev_ >= JS_EPSILON) {
+			if (close(strike_, 0.0)) {
+
+			}
+			else {
+				d1_ = std::log(forward_ / strike_) / stdDev_ + 0.5 * stdDev_;
+				d2_ = d1_ - stdDev_;
+				cum_d1_ = cdf(norm, d1_);
+				n_d1_ = pdf(norm, d1_);
+				cum_d2_ = cdf(norm, d2_);
+				n_d2_ = pdf(norm, d2_);
+			}
+		}
+		Calculator calc(*this);
+		p->accept(calc);
 	}
 
 	double BlackCalculator::value() const {
-		switch (type_) {
-		case Call:
-			return spot_ * divDf_ * cum_nd1_ - strike_ * yieldDf_ * cum_nd2_;
-		case Put:
-			return strike_ * yieldDf_ * cum_n_md2_ - spot_ * divDf_ * cum_n_md1_;
-		}
+		return value_;
 	}
 
 	double BlackCalculator::delta() const {
-		switch (type_) {
-		case Call:
-			return divDf_ * cum_nd1_;
-		case Put:
-			return -divDf_ * cum_n_md1_;
-		}
+		return delta_;
 	}
 
 	double BlackCalculator::gamma() const {
-		return strike_ * yieldDf_ * nd2_ / (spot_ * spot_ * vol_ * std::sqrt(TTM_));
+		return gamma_;
 	}
 
 	double BlackCalculator::theta() const {
-		switch (type_) {
-		case Call:
-			return -divDf_ * spot_ * nd1_ * vol_ / 2 / std::sqrt(TTM_)
-				- riskLessRate_ * strike_ * yieldDf_ * cum_nd2_
-				+ div_ * spot_ * divDf_ * cum_nd1_;
-		case Put:
-			return -divDf_ * spot_ * nd1_ * vol_ / 2 / std::sqrt(TTM_)
-				+ riskLessRate_ * strike_ * yieldDf_ * cum_n_md2_
-				- div_ * spot_ * divDf_ * cum_n_md1_;
-		}
+		return theta_;
 	}
 
 	double BlackCalculator::vega() const {
-		return strike_ * yieldDf_ * nd2_ * std::sqrt(TTM_);
+		return vega_;
 	}
 
 	double BlackCalculator::rho() const {
-		switch (type_) {
-		case Call:
-			return strike_ * TTM_ * yieldDf_ * cum_nd2_;
-		case Put:
-			return -strike_ * TTM_ * yieldDf_ * cum_n_md2_;
-		}
+		return rho_;
 	}
 
 }

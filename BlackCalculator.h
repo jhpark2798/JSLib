@@ -1,34 +1,45 @@
 #pragma once
+#include "Option.h"
 #include "Payoff.h"
 #include "Time/Date.h"
+#include "DesignPattern/Visitor.h"
+
 #include <memory>
 
 namespace JSLib {
 
 	class BlackCalculator {
+	private:
+		class Calculator;
+		friend class Calculator;
 	public:
-		// s, r, tau, sigma, K, q, optionType 필요
-		// payoff => K, optionType
-		BlackCalculator(const std::shared_ptr<StrikedTypePayoff> payoff,
-			double spot, double vol, double riskLessRate, Date maturity, double div);
+		BlackCalculator(const std::shared_ptr<StrikedTypePayoff>& payoff,
+			double spot, double forward, double stdDev, double discount = 1.0);
+		BlackCalculator(Option::Type optionType,
+			double spot, double strike, double forward, double stdDev, double discount = 1.0);
+		virtual ~BlackCalculator() {}		// BlackCalculator의 파생 클래스가 있나봄
 		
 		double value() const;
-		double delta() const;
-		double gamma() const;
-		double theta() const;
-		double vega() const;
-		double rho() const;
+		virtual double delta() const;
+		virtual double gamma() const;
+		virtual double theta() const;
+		double vega() const;	// 왜 안 virtual?
+		double rho() const;	// 왜 안 virtual?
 
-	private:
-		double strike_, spot_, vol_, riskLessRate_, div_;
-		OptionType type_;
-		Date maturity_;
+		//virtual double delta(double spot) const;
+		//virtual double gamma(double spot) const;
+		//virtual double theta(double spot, double maturity) const;
+		//double vega(double maturity) const;	// 왜 안 virtual?
+		//double rho(double maturity) const;	// 왜 안 virtual?
 
-		double TTM_;
+	protected:
+		void initialize(const std::shared_ptr<StrikedTypePayoff>& p);
+		double spot_, strike_, forward_, stdDev_, discount_, variance_;
 		double d1_, d2_;
-		double nd1_, cum_nd1_, nd2_, cum_nd2_;
-		double cum_n_md1_, cum_n_md2_;
-		double divDf_, yieldDf_;
+		double n_d1_, cum_d1_, n_d2_, cum_d2_;
+
+		double value_;
+		double delta_, gamma_, theta_, vega_, rho_;
 	};
 
 }

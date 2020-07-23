@@ -48,31 +48,56 @@ int main() {
 
 void plainVanillaEx() {
 	// plain vanilla call option pricing example
-	Date today = Date(2019, 11, 18);
+	Date today(2019, 11, 18);
 	Settings::instance().evaluationDate() = today;
-	std::vector<Date> dates = { today, Date(2030,8,10) };
-	std::vector<double> yields = { 0.02, 0.02 };
-	std::shared_ptr<YieldTermStructure> yieldStructure
-		= std::make_shared<InterpolatedZeroCurve<Linear>>(dates, yields, Actual365());
-	std::shared_ptr<StochasticProcess1D> process 
-		= std::make_shared<GeometricBrownianMotionProcess>(100, 0, 0.2, yieldStructure);
 	Date maturDate(2019, 12, 18);
-	OptionType optionType = Call;
+	std::vector<Date> dates = { today, Date(2030,8,10) };
+	std::vector<double> riskFreeRate = { 0.02, 0.02 };
+	std::shared_ptr<YieldTermStructure> riskFreeTS = 
+		std::make_shared<InterpolatedZeroCurve<Linear>>(dates, riskFreeRate, Actual365());
+	std::vector<double> dividendRate = { 0.0, 0.0 };
+	std::shared_ptr<YieldTermStructure> dividendTS = 
+		std::make_shared<InterpolatedZeroCurve<Linear>>(dates, dividendRate, Actual365());
+	std::vector<Date> dates_vol(dates.begin() + 1, dates.end());
+	std::vector<double> blackVol = { 0.2 };
+	std::shared_ptr<BlackVolTermStructure> blackVolTS =
+		std::make_shared<BlackVarianceCurve>(dates.front(), dates_vol, blackVol, Actual365());
+	std::shared_ptr<Quote> x0 = std::make_shared<SimpleQuote>(100);
+	std::shared_ptr<GeneralizedBlackScholesProcess> process
+		= std::make_shared<GeneralizedBlackScholesProcess>(
+			x0, dividendTS, riskFreeTS, blackVolTS);	
+	Option::Type optionType = Option::Type::Call;
 	double strike = 100;
 	std::shared_ptr<PricingEngine> engine = 
 		std::make_shared<AnalyticEuropeanEngine>(process);
-	std::shared_ptr<Payoff> payoff = std::make_shared<PlainVanillaPayoff>(optionType, strike);
-	std::shared_ptr<Exercise> exercise = std::make_shared<EuropeanExercise>(maturDate);
-	VanillaOption option(payoff, exercise);
-	option.setPricingEngine(engine);
+	std::shared_ptr<Payoff> plainPayoff = 
+		std::make_shared<PlainVanillaPayoff>(optionType, strike);
+	std::shared_ptr<Payoff> digitalPayoff = 
+		std::make_shared<CashOrNothingPayoff>(optionType, strike, 1);
+	std::shared_ptr<Exercise> exercise = 
+		std::make_shared<EuropeanExercise>(maturDate);
+	VanillaOption plainVanillaOption(plainPayoff, exercise);
+	VanillaOption digitalOption(digitalPayoff, exercise);
+	plainVanillaOption.setPricingEngine(engine);
+	digitalOption.setPricingEngine(engine);
 
-	cout << "Analytic engine" << endl;
-	cout << "price : " << option.NPV() << endl;
-	cout << "delta : " << option.delta() << endl;
-	cout << "gamma : " << option.gamma() << endl;
-	cout << "theta : " << option.theta() << endl;
-	cout << "vega : " << option.vega() << endl;
-	cout << "rho : " << option.rho() << endl;
+	cout << "=====Analytic engine=====" << endl << endl;
+	cout << "Plain Vanilla Option" << endl;
+	cout << "price : " << plainVanillaOption.NPV() << endl;
+	cout << "delta : " << plainVanillaOption.delta() << endl;
+	cout << "gamma : " << plainVanillaOption.gamma() << endl;
+	cout << "theta : " << plainVanillaOption.theta() << endl;
+	cout << "vega : " << plainVanillaOption.vega() << endl;
+	cout << "rho : " << plainVanillaOption.rho() << endl;
+	cout << endl;
+
+	cout << "Digital Option" << endl;
+	cout << "price : " << digitalOption.NPV() << endl;
+	cout << "delta : " << digitalOption.delta() << endl;
+	cout << "gamma : " << digitalOption.gamma() << endl;
+	cout << "theta : " << digitalOption.theta() << endl;
+	cout << "vega : " << digitalOption.vega() << endl;
+	cout << "rho : " << digitalOption.rho() << endl;
 	cout << endl;
 }
 
@@ -96,28 +121,44 @@ void mcEx() {
 	std::shared_ptr<GeneralizedBlackScholesProcess> process
 		= std::make_shared<GeneralizedBlackScholesProcess>(
 			x0, dividendTS, riskFreeTS, blackVolTS);
-	OptionType optionType = Call;
+	Option::Type optionType = Option::Type::Call;
 	double strike = 100;
-	std::shared_ptr<Payoff> payoff = std::make_shared<PlainVanillaPayoff>(optionType, strike);
-	std::shared_ptr<Exercise> exercise = std::make_shared<EuropeanExercise>(maturDate);
-	VanillaOption option(payoff, exercise);
+	std::shared_ptr<Payoff> plainPayoff =
+		std::make_shared<PlainVanillaPayoff>(optionType, strike);
+	std::shared_ptr<Payoff> digitalPayoff =
+		std::make_shared<CashOrNothingPayoff>(optionType, strike, 1);
+	std::shared_ptr<Exercise> exercise =
+		std::make_shared<EuropeanExercise>(maturDate);
+	VanillaOption plainVanillaOption(plainPayoff, exercise);
+	VanillaOption digitalOption(digitalPayoff, exercise);
 
 	size_t timeSteps = 1;
 	int mcSeed = 0;
 	std::shared_ptr<PricingEngine> mcEngine =
 		MakeMcEuropeanEngine<PseudoRandom>(process)
 		.withSteps(timeSteps)
-		.withSamples(1000)
+		.withSamples(10000)
 		.withSeed(mcSeed);
-	option.setPricingEngine(mcEngine);
+	plainVanillaOption.setPricingEngine(mcEngine);
+	digitalOption.setPricingEngine(mcEngine);
 
-	cout << "Monte carlo engine" << endl;
-	cout << "price : " << option.NPV() << endl;
-	cout << "delta : " << option.delta() << endl;
-	cout << "gamma : " << option.gamma() << endl;
-	cout << "theta : " << option.theta() << endl;
-	cout << "vega : " << option.vega() << endl;
-	cout << "rho : " << option.rho() << endl;
+	cout << "=====Monte carlo engine=====" << endl << endl;
+	cout << "Plain Vanilla Option" << endl;
+	cout << "price : " << plainVanillaOption.NPV() << endl;
+	cout << "delta : " << plainVanillaOption.delta() << endl;
+	cout << "gamma : " << plainVanillaOption.gamma() << endl;
+	cout << "theta : " << plainVanillaOption.theta() << endl;
+	cout << "vega : " << plainVanillaOption.vega() << endl;
+	cout << "rho : " << plainVanillaOption.rho() << endl;
+	cout << endl;
+
+	cout << "Digital Option" << endl;
+	cout << "price : " << digitalOption.NPV() << endl;
+	cout << "delta : " << digitalOption.delta() << endl;
+	cout << "gamma : " << digitalOption.gamma() << endl;
+	cout << "theta : " << digitalOption.theta() << endl;
+	cout << "vega : " << digitalOption.vega() << endl;
+	cout << "rho : " << digitalOption.rho() << endl;
 	cout << endl;
 }
 
